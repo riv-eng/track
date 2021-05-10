@@ -1,4 +1,4 @@
-module track
+module github.com/riv-eng/track
 
 go 1.16
 
