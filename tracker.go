@@ -21,47 +21,47 @@ const NUM_TRACKER_POINTS int = 20
 const NUM_ROOM_BEACONS int = 20
 
 type BeaconData struct {
-	major uint16
-	minor uint16
-	pos   Vec2D
-	hot   bool
+	Major uint16
+	Minor uint16
+	Pos   Vec2D
+	Hot   bool
 }
 
 type BScanData struct {
-	b        BeaconData
-	rssi     int8
-	distance float64
+	BD        BeaconData
+	Rssi     int8
+	Distance float64
 }
 
 type RoomData struct {
-	width  float64
-	height float64
+	Width  float64
+	Height float64
 
-	bcns     [NUM_ROOM_BEACONS]BeaconData
-	bcns_num int
+	Bcns     [NUM_ROOM_BEACONS]BeaconData
+	Bcns_num int
 }
 
 type RoomDataGFX struct {
-	data   RoomData
-	w      int
-	h      int
-	offs_x int
-	offs_y int
+	RD   RoomData
+	W      int
+	H      int
+	Offs_x int
+	Offs_y int
 
-	gfx     canvas.Rectangle
-	bcn_gfx [NUM_ROOM_BEACONS]canvas.Rectangle
+	GFX     canvas.Rectangle
+	Bcn_gfx [NUM_ROOM_BEACONS]canvas.Rectangle
 }
 
 type TrackerData struct {
-	pos       [NUM_TRACKER_POINTS]Vec2D
-	pos_index int
-	scan      [NUM_TRACKER_BEACONS]BScanData
-	scan_num  int
+	Pos       [NUM_TRACKER_POINTS]Vec2D
+	Pos_index int
+	BS      [NUM_TRACKER_BEACONS]BScanData
+	Scan_num  int
 }
 
 type TrackerDataGFX struct {
-	td  TrackerData
-	gfx [NUM_TRACKER_POINTS]canvas.Circle
+	TD  TrackerData
+	GFX [NUM_TRACKER_POINTS]canvas.Circle
 }
 
 func Vec_2d_mean(vecs [NUM_TRACKER_BEACONS]Vec2D, num int) Vec2D {
@@ -138,11 +138,11 @@ func Circle_intersection(c1 Circle2D, c2 Circle2D, right_side bool) Vec2D {
 
 func TrackerScanUpd(td *TrackerData, scan_data []BScanData, num int) {
 
-	td.scan_num = num
+	td.Scan_num = num
 
 	for i := 0; i < num; i++ {
-		td.scan[i] = scan_data[i]
-		td.scan[i].distance = (-0.1895064*float64(scan_data[i].rssi) - 11.62893)
+		td.BS[i] = scan_data[i]
+		td.BS[i].Distance = (-0.1895064*float64(scan_data[i].Rssi) - 11.62893)
 	}
 }
 
@@ -152,11 +152,11 @@ func TrackerPosUpd(td *TrackerData, room *RoomData) {
 	var c_buf [NUM_TRACKER_BEACONS]Circle2D
 	var c_buf_index int = 0
 
-	for s := 0; s < td.scan_num; s++ {
-		for b := 0; b < room.bcns_num; b++ {
-			if (td.scan[s].b.major == room.bcns[b].major) && (td.scan[s].b.minor == room.bcns[b].minor) {
-				c_buf[c_buf_index].O = room.bcns[b].pos
-				c_buf[c_buf_index].R = td.scan[s].distance
+	for s := 0; s < td.Scan_num; s++ {
+		for b := 0; b < room.Bcns_num; b++ {
+			if (td.BS[s].BD.Major == room.Bcns[b].Major) && (td.BS[s].BD.Minor == room.Bcns[b].Minor) {
+				c_buf[c_buf_index].O = room.Bcns[b].pos
+				c_buf[c_buf_index].R = td.BS[s].Distance
 				c_buf_index++
 			}
 		}
@@ -171,11 +171,11 @@ func TrackerPosUpd(td *TrackerData, room *RoomData) {
 
 		cross[c_buf_index-1] = Circle_intersection(c_buf[c_buf_index-1], c_buf[0], true)
 
-		td.pos[td.pos_index] = Vec_2d_mean(cross, c_buf_index)
-		td.pos_index++
+		td.Pos[td.Pos_index] = Vec_2d_mean(cross, c_buf_index)
+		td.Pos_index++
 
-		if td.pos_index >= NUM_TRACKER_POINTS {
-			td.pos_index = 0
+		if td.Pos_index >= NUM_TRACKER_POINTS {
+			td.Pos_index = 0
 		}
 	}
 }
